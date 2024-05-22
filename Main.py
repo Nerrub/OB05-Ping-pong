@@ -1,67 +1,77 @@
 import pygame
-
 import sys
 
+# Инициализация Pygame
 pygame.init()
 
-screen_width, screen_height = 600, 400
-
+# Определение размеров экрана
+screen_width = 800
+screen_height = 600
 screen = pygame.display.set_mode((screen_width, screen_height))
-
-pygame.display.set_caption("Пин-понг")
+pygame.display.set_caption('Ping Pong')
 
 # Цвета
+black = (0, 0, 0)
+white = (255, 255, 255)
 
-BLACK = (0, 0, 0)
+# Координаты и размеры объектов
+ball_radius = 15
+ball_x = screen_width // 2
+ball_y = screen_height // 2
+ball_dx = 3
+ball_dy = 3
 
-WHITE = (255, 255, 255)
-
-BLUE = (0, 0, 255)
-
-# FPS
-
-clock = pygame.time.Clock()
-fps = 60
-
-# Параметры платформы
-paddle_width, paddle_height = 100, 10
-paddle_x = (screen_width - paddle_width) // 2
-paddle_y = screen_height - paddle_height - 20
+paddle_width = 10
+paddle_height = 100
 paddle_speed = 6
 
-# Параметры мяча
-ball_radius = 8
-ball_x = screen_width // 2
-ball_y = paddle_y - ball_radius
-ball_speed_x = 4
-ball_speed_y = -4
+left_paddle_x = 30
+left_paddle_y = (screen_height - paddle_height) // 2
 
-# Запуск основного цикла игры
-running = True
-while running:
-    # Обработка событий
+right_paddle_x = screen_width - 40
+right_paddle_y = (screen_height - paddle_height) // 2
 
+# Основной игровой цикл
+clock = pygame.time.Clock()
+while True:
     for event in pygame.event.get():
-    if event.type == pygame.QUIT:
-    running = False
-
-    # Движение платформы
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
 
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and paddle_x > 0:
-        paddle_x -= paddle_speed
-        if keys[pygame.K_RIGHT] and paddle_x < screen_width - paddle_width:
-        paddle_x += paddle_speed
-    # Движение мяча
-    ball_x += ball_speed_x
-    ball_y += ball_speed_y
+    if keys[pygame.K_w] and left_paddle_y > 0:
+        left_paddle_y -= paddle_speed
+    if keys[pygame.K_s] and left_paddle_y < screen_height - paddle_height:
+        left_paddle_y += paddle_speed
+    if keys[pygame.K_UP] and right_paddle_y > 0:
+        right_paddle_y -= paddle_speed
+    if keys[pygame.K_DOWN] and right_paddle_y < screen_height - paddle_height:
+        right_paddle_y += paddle_speed
 
-    # Столкновение с краями экрана
+    ball_x += ball_dx
+    ball_y += ball_dy
 
-    if ball_x <= 0 or ball_x >= screen_width:
-    ball_speed_x = -ball_speed_x
-    if ball_y <= 0:
-    ball_speed_y = -ball_speed_y
-    if ball_y >= screen_height:
+    if ball_y - ball_radius <= 0 or ball_y + ball_radius >= screen_height:
+        ball_dy = -ball_dy
 
+    if (ball_x - ball_radius <= left_paddle_x + paddle_width and
+        left_paddle_y <= ball_y <= left_paddle_y + paddle_height):
+        ball_dx = -ball_dx
 
+    if (ball_x + ball_radius >= right_paddle_x and
+        right_paddle_y <= ball_y <= right_paddle_y + paddle_height):
+        ball_dx = -ball_dx
+
+    if ball_x - ball_radius <= 0 or ball_x + ball_radius >= screen_width:
+        ball_x = screen_width // 2
+        ball_y = screen_height // 2
+        ball_dx = -ball_dx
+
+    screen.fill(black)
+    pygame.draw.rect(screen, white, (left_paddle_x, left_paddle_y, paddle_width, paddle_height))
+    pygame.draw.rect(screen, white, (right_paddle_x, right_paddle_y, paddle_width, paddle_height))
+    pygame.draw.circle(screen, white, (ball_x, ball_y), ball_radius)
+
+    pygame.display.flip()
+    clock.tick(60)
